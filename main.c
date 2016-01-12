@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#define MAX 200
 
 typedef struct Monome {
     double coefficient;
@@ -40,7 +39,7 @@ Monome puissanceNiemeMonome(Monome m, long n) {
     return retour;
 }
 
-/*** Fonctions sur les polynômes ***/
+/*** Fonctions sur les listes de monômes ***/
 
 // Initialisation
 
@@ -49,10 +48,17 @@ Monome puissanceNiemeMonome(Monome m, long n) {
 // Ecriture dans le fichier
 
 // Dérivée
-void deriveePolynome(Monome * tete) {
+/** Commentaires pour Maureen :3 **/
+/** Je récupère un pointeur sur le premier monome de la liste que j'appelle tete **/
+void deriveeListeMonome(Monome * tete) {
     Monome derivee;
     if (tete != NULL) {
         // on parcourt la liste
+        /** Tant que la tete a un monome qui la suit :
+        on dérive un monome, on met ses valeurs dans la tete et on dit que la tete correspond maintenant à son suivant
+        Si le polynome est x1 + x2 + x3 :
+        Ca veut dire qu'on envoie x1 dans la fonction. Qu'on le dérive et qu'on modifie ses valeurs.
+        Ensuite, on dit que la tete correspond à x2 pour faire de même**/
         while (tete->next != NULL) {
             derivee = deriveeMonome(*tete);
             tete->coefficient = derivee.coefficient;
@@ -63,7 +69,7 @@ void deriveePolynome(Monome * tete) {
 }
 
 // Puissance n-ième
-void puissanceNiemePolynome(Monome * tete, long n) {
+void puissanceNiemeListeMonome(Monome * tete, long n) {
     Monome puissance;
     if (tete != NULL) {
         // on parcourt la liste
@@ -81,7 +87,7 @@ void puissanceNiemePolynome(Monome * tete, long n) {
 // Produit
 
 // Calcul pour une valeur de x
-double valeurXPolynome(Monome * tete, double x) {
+double valeurXListeMonome(Monome * tete, double x) {
     double resultatMonome = 0;
     printf("%d %f \n", tete->coefficient, tete->degre);
     double resultatPolynome = 0;
@@ -94,6 +100,40 @@ double valeurXPolynome(Monome * tete, double x) {
         }
     }
     return resultatPolynome;
+}
+
+// Calcul pour une valeur de x (méthode Horner)
+
+// Quotient / Reste de la division euclidienne
+
+// PGCD
+
+
+/*** Fonctions sur les polynômes ***/
+
+// Initialisation
+
+// Lecture dans le fichier
+
+// Ecriture dans le fichier
+
+// Dérivée
+void deriveePolynome() {
+
+}
+
+// Puissance n-ième
+void puissanceNiemePolynome() {
+
+}
+
+// Somme
+
+// Produit
+
+// Calcul pour une valeur de x
+double valeurXPolynome() {
+
 }
 
 // Calcul pour une valeur de x (méthode Horner)
@@ -139,17 +179,17 @@ int main()
 
     // Test derivation polynome
     printf("On teste la derivation d'un polynome entier : ((%f,%ld),(%f,%ld),(%f,%ld)) \n", x1.coefficient, x1.degre, x2.coefficient, x2.degre, x3.coefficient, x3.degre);
-    deriveePolynome(&x1);
+    deriveeListeMonome(&x1);
     printf("Devient : ((%f,%ld),(%f,%ld),(%f,%ld)) \n", x1.coefficient, x1.degre, x2.coefficient, x2.degre, x3.coefficient, x3.degre);
 
     // Test puissance n-ième polynome
     printf("On teste a la puissance 3 un polynome entier : ((%f,%ld),(%f,%ld),(%f,%ld)) \n", x1.coefficient, x1.degre, x2.coefficient, x2.degre, x3.coefficient, x3.degre);
-    puissanceNiemePolynome(&x1, 3);
+    puissanceNiemeListeMonome(&x1, 3);
     printf("Il devient : ((%f,%ld),(%f,%ld),(%f,%ld)) \n", x1.coefficient, x1.degre, x2.coefficient, x2.degre, x3.coefficient, x3.degre);
 
     // Test valeur X polynome
     printf("On teste avec x=3 un polynome entier : ((%f,%ld),(%f,%ld),(%f,%ld)) \n", x1.coefficient, x1.degre, x2.coefficient, x2.degre, x3.coefficient, x3.degre);
-    resultat = valeurXPolynome(&x1, 3);
+    resultat = valeurXListeMonome(&x1, 3);
     printf("On obtient : %d \n", resultat);
 
     return 0;
