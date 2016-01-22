@@ -310,21 +310,28 @@ int produitPolynome(Polynome a, Polynome b, Polynome *resultat) {
 // Dérivée
 /* On dérive la liste de monomes du polynome
  * Et on enlève un au degré du polynome */
-int deriveePolynome(Polynome *p) {
-    if(p->degre < 0) {
+int deriveePolynome(Polynome p, Polynome *resultat) {
+    if(p.degre < 0) {
         fprintf(stderr, "Le degré du polynôme doit être positif ou égal à 0", ERREUR_DEGRE);
         return ERREUR_DEGRE;
     }
 
+    dupliquePolynome(p, resultat);
     Monome *temp;
-    Monome *tete = p->monomes;
+    Monome *tete = resultat->monomes;
     while (tete != NULL) {
-        *temp = deriveeMonome(*tete);
+        if(tete->degre > 1) {
+            *temp = deriveeMonome(*tete);
+        }
+        else {
+            temp->coefficient = 0;
+            temp->degre = 0;
+        }
         temp->next = tete->next;
         *tete = *temp;
         tete = tete->next;
     }
-    p->degre --;
+    resultat->degre = p.degre - 1;
 
     return SUCCES;
 }
@@ -332,8 +339,8 @@ int deriveePolynome(Polynome *p) {
 // Puissance n-ième
 /* On remarque que mettre un polynome à la puissance n, c'est le multiplier n fois avec lui-même
  * On fait donc n fois un produit de polynomes */
-int puissanceNiemePolynome(Polynome *p, long n) {
-    if(p->degre < 0) {
+int puissanceNiemePolynome(Polynome p, Polynome *resultat, long n) {
+    if(p.degre < 0) {
         fprintf(stderr, "Le degré du polynôme doit être positif ou égal à 0", ERREUR_DEGRE);
         return ERREUR_DEGRE;
     }
@@ -342,14 +349,14 @@ int puissanceNiemePolynome(Polynome *p, long n) {
         return ERREUR_VALEUR;
     }
 
-    Polynome *resultat;
-    initialiserPolynome(resultat);
+    dupliquePolynome(p, resultat);
+    Polynome *temp;
+    initialiserPolynome(temp);
     long i;
     for(i = 1; i < n; i++) {
-        printf("test \n");
-        produitPolynome(*p, *p, resultat);
+        produitPolynome(*resultat, *resultat, temp);
     }
-    *p = *resultat;
+    *resultat = *temp;
 
     return SUCCES;
 }

@@ -40,10 +40,10 @@ int testUnitaires() {
     if(produitPolynome(p, p, &resultatP) != ERREUR_DEGRE) {
         return 1;
     }
-    if(deriveePolynome(&p) != ERREUR_DEGRE) {
+    if(deriveePolynome(p, &resultatP) != ERREUR_DEGRE) {
         return 1;
     }
-    if(puissanceNiemePolynome(&p, 4) != ERREUR_DEGRE) {
+    if(puissanceNiemePolynome(p, &resultatP, 4) != ERREUR_DEGRE) {
         return 1;
     }
     if(valeurXPolynome(p, 3, &resultatD) != ERREUR_DEGRE) {
@@ -62,7 +62,7 @@ int testUnitaires() {
 
     p.degre = 3;
     // Tests pour une puissance < 1
-    if(puissanceNiemePolynome(&p, -2) != ERREUR_VALEUR) {
+    if(puissanceNiemePolynome(p, &resultatP, -2) != ERREUR_VALEUR) {
         return 1;
     }
 
@@ -137,17 +137,17 @@ int main()
     printf("On teste la puissance nieme de : \n");
     afficherPolynome(p1);
     printf("le resultat est : \n");
-    puissanceNiemePolynome(&p1, 3);
-    afficherPolynome(p1);
+    puissanceNiemePolynome(p1, &result, 3);
+    afficherPolynome(result);
 
     printf(" \n \n");
     printf("On teste la dérivée de : \n");
     afficherPolynome(p1);
     printf("le resultat est : \n");
-    deriveePolynome(&p1);
-    afficherPolynome(p1);
+    deriveePolynome(p1, &result);
+    afficherPolynome(result);
 
-    printf(" \n \n");
+    /*printf(" \n \n");
     printf("On fait la division euclidienne de : \n");
     afficherPolynome(p1);
     printf("par : \n");
@@ -164,7 +164,7 @@ int main()
     afficherPolynome(p2);
     printf("le resultat est : \n");
     pgcdPolynome(&p1, &p2, result);
-    afficherPolynome(result);
+    afficherPolynome(result);*/
 
     return 0;
 }
