@@ -114,7 +114,11 @@ int ajouterMonome(Polynome *p, Monome m) {
 
 // Lecture dans le fichier
 /* On lit le fichier dont le nom est donné par l'utilisateur et on récupère son contenu */
+<<<<<<< HEAD
 int lectureFichier(char chaine[])
+=======
+void lectureFichier(char chaine[])
+>>>>>>> origin/master
 {
     FILE *fichier = NULL;
     char nomFichier[50]="";
@@ -130,10 +134,13 @@ int lectureFichier(char chaine[])
         fgets(chaine, 100, fichier);
 
         fclose(fichier);
+<<<<<<< HEAD
         return SUCCES;
     }
     else {
         return ERREUR_VALEUR;
+=======
+>>>>>>> origin/master
     }
 }
 
@@ -179,13 +186,21 @@ int creationPolynome(char chaine[], Polynome *p) {
                 coef[l] = "";
                 deg[l] = "";
             }
+<<<<<<< HEAD
+=======
+            printf("%f\n", m1.coefficient);
+            printf("%ld\n", m1.degre);
+>>>>>>> origin/master
 
             //PASSER AU MONOME SUIVANT
             ajouterMonome(p, m1);
             initialiserMonome(&m1);
         }
     }
+<<<<<<< HEAD
     afficherPolynome(*p);
+=======
+>>>>>>> origin/master
 
     if(p->degre <= 0) {
         fprintf(stderr, "Le polynome n'a pas pu être crée", ERREUR_DEGRE);
@@ -230,19 +245,26 @@ int sommePolynome(Polynome a, Polynome b, Polynome *resultat) {
         return ERREUR_DEGRE;
     }
 
+<<<<<<< HEAD
     int fonctionne = 0;
+=======
+>>>>>>> origin/master
     Monome temp;
     initialiserMonome(&temp);
     initialiserPolynome(resultat);
     Monome *teteB = b.monomes;
     Monome *teteA = a.monomes;
+<<<<<<< HEAD
     Monome *teteR;
+=======
+>>>>>>> origin/master
     while(teteA != NULL) {
         teteB = b.monomes;
         while(teteB != NULL) {
             if(teteA->degre == teteB->degre) {
                 temp = sommeMonome(*teteA, *teteB);
                 ajouterMonome(resultat, temp);
+<<<<<<< HEAD
                 fonctionne = 1;
             }
             teteB = teteB->next;
@@ -269,6 +291,14 @@ int sommePolynome(Polynome a, Polynome b, Polynome *resultat) {
         }
         teteB = teteB->next;
     }
+=======
+            }
+            teteB = teteB->next;
+        }
+        teteA = teteA->next;
+    }
+    teteA = a.monomes;
+>>>>>>> origin/master
 
     return SUCCES;
 }
@@ -288,7 +318,10 @@ int soustractionPolynome(Polynome a, Polynome b, Polynome *resultat) {
     initialiserPolynome(resultat);
     Monome *teteB = b.monomes;
     Monome *teteA = a.monomes;
+<<<<<<< HEAD
     Monome *teteR;
+=======
+>>>>>>> origin/master
     while(teteA != NULL) {
         teteB = b.monomes;
         while(teteB != NULL) {
@@ -296,6 +329,7 @@ int soustractionPolynome(Polynome a, Polynome b, Polynome *resultat) {
                 temp = soustractionMonome(*teteA, *teteB);
                 ajouterMonome(resultat, temp);
             }
+<<<<<<< HEAD
             else {
                 initialiserMonome(&temp);
             }
@@ -322,6 +356,13 @@ int soustractionPolynome(Polynome a, Polynome b, Polynome *resultat) {
         }
         teteB = teteB->next;
     }
+=======
+            teteB = teteB->next;
+        }
+        teteA = teteA->next;
+    }
+    teteA = a.monomes;
+>>>>>>> origin/master
 
     return SUCCES;
 }
@@ -337,13 +378,23 @@ int produitPolynome(Polynome a, Polynome b, Polynome *resultat) {
         return ERREUR_DEGRE;
     }
 
+<<<<<<< HEAD
+=======
+    long i, j;
+>>>>>>> origin/master
     Monome m;
     initialiserPolynome(resultat);
     Monome *teteB = b.monomes;
     Monome *teteA = a.monomes;
+<<<<<<< HEAD
     while(teteA != NULL) {
         teteB = b.monomes;
         while(teteB != NULL) {
+=======
+    for(i = 1; i <= a.degre; i++){
+        teteB = b.monomes;
+        for(j = 1; j <= b.degre; j++) {
+>>>>>>> origin/master
             m = produitMonome(*teteA, *teteB);
             ajouterMonome(resultat, m);
             teteB = teteB->next;
@@ -369,7 +420,10 @@ int deriveePolynome(Polynome p, Polynome *resultat) {
     Monome *temp;
     Monome *tete = resultat->monomes;
     while (tete != NULL) {
+<<<<<<< HEAD
         *temp = *tete;
+=======
+>>>>>>> origin/master
         if(tete->degre > 1) {
             *temp = deriveeMonome(*tete);
         }
@@ -377,12 +431,20 @@ int deriveePolynome(Polynome p, Polynome *resultat) {
             temp->coefficient = 0;
             temp->degre = 0;
         }
+<<<<<<< HEAD
 
         tete->coefficient = temp->coefficient;
         tete->degre = temp->degre;
         tete = tete->next;
     }
     resultat->degre = resultat->monomes->degre;
+=======
+        temp->next = tete->next;
+        *tete = *temp;
+        tete = tete->next;
+    }
+    resultat->degre = p.degre - 1;
+>>>>>>> origin/master
 
     return SUCCES;
 }
