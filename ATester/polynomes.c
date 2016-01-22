@@ -1,0 +1,502 @@
+#include "polynomes.h"
+
+/** Fonctions sur les polynômes **/
+
+// Initialisation
+/* Nous initialisons le polynome avec un degré maximum à 0 et une liste de monomes à NULL (donc vide) */
+void initialiserPolynome(Polynome *p) {
+    p->degre = 0;
+    p->monomes = NULL;
+}
+
+// Afficher le polynome
+/* Fonction servant à réaliser des tests pour vérifier les résulats en affichant sur la console les polynomnes */
+int afficherPolynome(Polynome p) {
+    if(p.degre < 0) {
+        fprintf(stderr, "Le degré du polynôme doit être positif ou égal à 0", ERREUR_DEGRE);
+        return ERREUR_DEGRE;
+    }
+
+    Monome *temp = p.monomes;
+    printf("(");
+    if(temp != NULL) {
+        while(temp->next != NULL) {
+            printf("(%f,%ld),", temp->coefficient, temp->degre);
+            temp = temp->next;
+        }
+        printf("(%f,%ld));\n", temp->coefficient, temp->degre);
+    }
+    else {
+        printf(");\n");
+    }
+
+    return SUCCES;
+}
+
+// Ajoute un monome à un polynome vide
+void ajouterMonomePolynomeVide(Polynome *p, Monome m) {
+    Monome *temp;
+    initialiserMonomeValeurs(&temp, m.coefficient, m.degre);
+    p->monomes = temp;
+    p->degre = temp->degre;
+}
+
+// Ajoute un monome au début d'un polynome
+void ajouterMonomePolynomeDebut(Polynome *p, Monome m) {
+    Monome *temp;
+    initialiserMonomeValeurs(&temp, m.coefficient, m.degre);
+    temp->next = p->monomes;
+    p->monomes = temp;
+}
+
+// Ajoute un monome à un polynome lorsqu'il existe déjà un monome de même degré en tête
+void ajouterMonomePolynomeMemeDegre(Polynome *p, Monome m) {
+    p->monomes->coefficient += m.coefficient;
+    if(p->monomes->coefficient == 0) {
+        p->monomes = p->monomes->next;
+    }
+}
+
+// Ajoute un monome entre deux monomes de degrés différents
+void ajouterMonomePolynomeDegreInferieur(Polynome *p, Monome m) {
+    Monome *tete;
+    initialiserMonomeValeurs(&tete, m.coefficient, m.degre);
+    Monome *courant = p->monomes;
+    while(courant->next != NULL) {
+        if(tete->degre >= courant->next->degre) {
+            break;
+        }
+        courant = courant->next;
+    }
+    if(courant->next != NULL) {
+        if(courant->next->degre == tete->degre) {
+            courant->next->coefficient += tete->coefficient;
+            if(courant->next->coefficient == 0) {
+                courant->next = courant->next->next;
+            }
+        }
+        else {
+            tete->next = courant->next;
+            courant->next = tete;
+        }
+    }
+    else {
+        courant->next = tete;
+    }
+}
+
+// Ajout d'un monome dans un polynome
+/* On récupère un polynome et on a ajoute un monome dedans.
+ * On vérifie le degré du monome et le degré du polynome pour avoir les monomes dans un ordre décroissant */
+int ajouterMonome(Polynome *p, Monome m) {
+    if(p->degre < 0 || m.degre < 0) {
+        fprintf(stderr, "Le degré du polynôme doit être positif ou égal à 0", ERREUR_DEGRE);
+        return ERREUR_DEGRE;
+    }
+
+    if(p->monomes != NULL) {
+        if(m.degre > p->degre) {
+            ajouterMonomePolynomeDebut(p, m);
+        }
+        else if(m.degre == p->degre) {
+            ajouterMonomePolynomeMemeDegre(p, m);
+        }
+        else {
+            ajouterMonomePolynomeDegreInferieur(p, m);
+        }
+    }
+    else {
+        ajouterMonomePolynomeVide(p, m);
+    }
+
+    return SUCCES;
+}
+
+// Lecture dans le fichier
+/* On lit le fichier dont le nom est donné par l'utilisateur et on récupère son contenu */
+int lectureFichier(char chaine[]) {
+    FILE *fichier = NULL;
+    //On ouvre le fichier
+    fichier = fopen("polynome.txt", "r");
+
+    if (fichier != NULL)
+    {
+        fgets(chaine, 100, fichier);
+        fclose(fichier);
+
+        return SUCCES;
+    }
+    else {
+        return ERREUR_VALEUR;
+    }
+}
+
+// Création d'un polynome
+/* A partir du contenu du fichier, on récupère chaque élément des monomes écrits sous la forme ((coefficient,degre);(coefficient,degre))
+ * et on crée un polynome qui contient tous ces monomes */
+int creationPolynome(char chaine[], Polynome *p) {
+    lectureFichier(chaine);
+    if(chaine == NULL) {
+        fprintf(stderr, "Le fichier n'a pas été lu correctement, le polynome ne peut donc pas être crée. ", ERREUR_VALEUR);
+        return ERREUR_VALEUR;
+    }
+
+    int i = 0, j = 0, k = 0, l = 0;
+    char coef[10] = "";
+    char deg[10] = "";
+    Monome m1;
+    initialiserMonome(&m1);
+
+    while(chaine[i] != '\n') {
+        if(isdigit(chaine[i]) != 0) { //Si c'est un chiffre
+            while(chaine[i] != ',') {
+                coef[j] = chaine[i];
+                i++;
+                j++;
+            }
+            if(chaine[i] == ',') {
+                i++;
+                while(chaine[i] != ')') {
+                    deg[k]=chaine[i];
+                    i++;
+                    k++;
+                }
+            }
+        }
+        i++;
+        if(chaine[i] == ';') {
+            m1.coefficient = atof(coef); //Atof : string to double
+            m1.degre = atol(deg);
+            j = 0;
+            k = 0;
+            for(l = 0; l < 10; l++) {
+                coef[l] = "";
+                deg[l] = "";
+            }
+            printf("%f\n", m1.coefficient);
+            printf("%ld\n", m1.degre);
+
+            //PASSER AU MONOME SUIVANT
+            ajouterMonome(p, m1);
+            initialiserMonome(&m1);
+        }
+    }
+
+    if(p->degre <= 0) {
+        fprintf(stderr, "Le polynome n'a pas pu être crée", ERREUR_DEGRE);
+        return ERREUR_DEGRE;
+    }
+    else {
+        return SUCCES;
+    }
+}
+
+// Duplique un polynome
+/* Récupère un polyme et met tous ses monômes et son degré dans un autre polynome */
+int dupliquePolynome(Polynome p, Polynome *resultat) {
+    if(p.degre < 0) {
+        fprintf(stderr, "Le degré du polynôme doit être positif ou égal à 0", ERREUR_DEGRE);
+        return ERREUR_DEGRE;
+    }
+
+    initialiserPolynome(resultat);
+    if(p.monomes != NULL){
+        initialiserMonomeValeurs(&(resultat->monomes), p.monomes->coefficient, p.monomes->degre);
+        Monome *tete = p.monomes->next;
+        Monome *resultatMonome = resultat->monomes;
+        while(tete != NULL) {
+            resultatMonome->next = tete->next;
+            resultatMonome = resultatMonome->next;
+            tete = tete->next;
+        }
+    }
+    resultat->degre = p.degre;
+
+    return SUCCES;
+}
+
+// Somme de deux polynomes
+/* On parcourt les deux polynomes et on vérifie les degrés de chaque monomes.
+ * Si les degrés des deux monomes comparés sont identiques, on fait leur somme
+ * Sinon, on passe au monome suivant.*/
+int sommePolynome(Polynome a, Polynome b, Polynome *resultat) {
+    if(a.degre < 0 || b.degre < 0) {
+        fprintf(stderr, "Le degré du polynôme doit être positif ou égal à 0", ERREUR_DEGRE);
+        return ERREUR_DEGRE;
+    }
+
+    Monome temp;
+    initialiserMonome(&temp);
+    initialiserPolynome(resultat);
+    Monome *teteB = b.monomes;
+    Monome *teteA = a.monomes;
+    while(teteA != NULL) {
+        teteB = b.monomes;
+        while(teteB != NULL) {
+            if(teteA->degre == teteB->degre) {
+                temp = sommeMonome(*teteA, *teteB);
+                ajouterMonome(resultat, temp);
+            }
+            teteB = teteB->next;
+        }
+        teteA = teteA->next;
+    }
+    teteA = a.monomes;
+
+    return SUCCES;
+}
+
+// Soustraction de deux polynomes (a - b)
+/* On parcourt les deux polynomes et on vérifie les degrés de chaque monomes.
+ * Si les degrés des deux monomes comparés sont identiques, on fait leur soustraction
+ * Sinon, on passe au monome suivant.*/
+int soustractionPolynome(Polynome a, Polynome b, Polynome *resultat) {
+    if(a.degre < 0 || b.degre < 0) {
+        fprintf(stderr, "Le degré du polynôme doit être positif ou égal à 0", ERREUR_DEGRE);
+        return ERREUR_DEGRE;
+    }
+
+    Monome temp;
+    initialiserMonome(&temp);
+    initialiserPolynome(resultat);
+    Monome *teteB = b.monomes;
+    Monome *teteA = a.monomes;
+    while(teteA != NULL) {
+        teteB = b.monomes;
+        while(teteB != NULL) {
+            if(teteA->degre == teteB->degre) {
+                temp = soustractionMonome(*teteA, *teteB);
+                ajouterMonome(resultat, temp);
+            }
+            teteB = teteB->next;
+        }
+        teteA = teteA->next;
+    }
+    teteA = a.monomes;
+
+    return SUCCES;
+}
+
+// Produit
+/* On parcourt les deux polynomes.
+ * On multiplie tous les monomes de b avec le premier monome de a,
+ * puis on recommence avec le deuxième monome de a, et ainsi de suite
+ * jusqu'à qu'il n'y ait plus de monomes dans a.*/
+int produitPolynome(Polynome a, Polynome b, Polynome *resultat) {
+    if(a.degre < 0 || b.degre < 0) {
+        fprintf(stderr, "Les degrés des deux polynômes doivent être positifs ou égaux à 0", ERREUR_DEGRE);
+        return ERREUR_DEGRE;
+    }
+
+    long i, j;
+    Monome m;
+    initialiserPolynome(resultat);
+    Monome *teteB = b.monomes;
+    Monome *teteA = a.monomes;
+    for(i = 1; i <= a.degre; i++){
+        teteB = b.monomes;
+        for(j = 1; j <= b.degre; j++) {
+            m = produitMonome(*teteA, *teteB);
+            ajouterMonome(resultat, m);
+            teteB = teteB->next;
+        }
+        teteA = teteA->next;
+    }
+    teteA = a.monomes;
+    resultat->degre = a.degre + b.degre;
+
+    return SUCCES;
+}
+
+// Dérivée
+/* On dérive la liste de monomes du polynome
+ * Et on enlève un au degré du polynome */
+int deriveePolynome(Polynome p, Polynome *resultat) {
+    if(p.degre < 0) {
+        fprintf(stderr, "Le degré du polynôme doit être positif ou égal à 0", ERREUR_DEGRE);
+        return ERREUR_DEGRE;
+    }
+
+    dupliquePolynome(p, resultat);
+    Monome *temp;
+    Monome *tete = resultat->monomes;
+    while (tete != NULL) {
+        if(tete->degre > 1) {
+            *temp = deriveeMonome(*tete);
+        }
+        else {
+            temp->coefficient = 0;
+            temp->degre = 0;
+        }
+        temp->next = tete->next;
+        *tete = *temp;
+        tete = tete->next;
+    }
+    resultat->degre = p.degre - 1;
+
+    return SUCCES;
+}
+
+// Puissance n-ième
+/* On remarque que mettre un polynome à la puissance n, c'est le multiplier n fois avec lui-même
+ * On fait donc n fois un produit de polynomes */
+int puissanceNiemePolynome(Polynome p, Polynome *resultat, long n) {
+    if(p.degre < 0) {
+        fprintf(stderr, "Le degré du polynôme doit être positif ou égal à 0", ERREUR_DEGRE);
+        return ERREUR_DEGRE;
+    }
+    if(n <= 1) {
+        fprintf(stderr, "La puissance doit etre supérieur à 1", ERREUR_VALEUR);
+        return ERREUR_VALEUR;
+    }
+
+    dupliquePolynome(p, resultat);
+    Polynome *temp;
+    initialiserPolynome(temp);
+    long i;
+    for(i = 1; i < n; i++) {
+        produitPolynome(*resultat, *resultat, temp);
+    }
+    *resultat = *temp;
+
+    return SUCCES;
+}
+
+// Calcul pour une valeur de x
+/* On fait le calcul pour une valeur de x avec la liste de monomes du polynome */
+int valeurXPolynome(Polynome p, double x, double *resultat) {
+    if(p.degre < 0) {
+        fprintf(stderr, "Le degré du polynôme doit être positif ou égal à 0", ERREUR_DEGRE);
+        return ERREUR_DEGRE;
+    }
+
+    double temp = 0;
+    *resultat = 0;
+    Monome *tete = p.monomes;
+
+    while (tete->next != NULL) {
+        temp = valeurXMonome(*tete, x);
+        *resultat += temp;
+        tete = tete->next;
+    }
+    temp = valeurXMonome(*tete, x);
+    *resultat += temp;
+
+    return SUCCES;
+}
+
+// Calcul pour une valeur de x (méthode Horner)
+/* On applique la méthode de Horner en parcourant tous les monomes du polynomes
+ * A chaque monome : on multiplie la variable r (qui est égale au coefficient du premier monome) par x
+ * Et on lui ajoute la valeur du coefficient actuel.
+ * Si on arrive au dernier monome, le prochain coefficient est donc à 0. On a donc uniquement un produit de r et x. */
+int valeurXPolynomeHorner(Polynome p, double x, double *resultat) {
+    if(p.degre < 0) {
+        fprintf(stderr, "Le degré du polynôme doit être positif ou égal à 0", ERREUR_DEGRE);
+        return ERREUR_DEGRE;
+    }
+
+    Monome *m = p.monomes;
+    *resultat = m->coefficient;
+    long i;
+
+    for(i = p.degre; i > 0; i--) {
+        if(m->next != NULL) {
+            m = m->next;
+            *resultat = ((*resultat)*x) + m->coefficient;
+        }
+        else {
+            *resultat = ((*resultat)*x);
+        }
+    }
+
+    return SUCCES;
+ }
+
+// Quotient / Reste de la division euclidienne
+/* Par définition, on a : dividende = diviseur*quotient + reste.
+ * On calcule donc le produit du polynome diviseur et du polynome quotient
+ * et on a le reste qui est égal au polynome dividende - le résultat du produit ci-dessus */
+int divisionEuclidiennePolynome(Polynome dividende, Polynome diviseur, Polynome *quotient, Polynome *reste) {
+    if(dividende.degre < 0 || diviseur.degre < 0) {
+        fprintf(stderr, "Le degré du polynôme doit être positif ou égal à 0", ERREUR_DEGRE);
+        return ERREUR_DEGRE;
+    }
+
+    Monome temp_monome;
+    Polynome produit;
+    Polynome temp_polynome;
+    initialiserMonome(&temp_monome);
+    initialiserPolynome(&produit);
+    initialiserPolynome(quotient);
+    initialiserPolynome(&temp_polynome);
+    *reste = dividende;
+
+   while(reste->degre >= diviseur.degre) {
+        temp_monome = divisionMonome(*(reste->monomes), *(diviseur.monomes));
+        ajouterMonome(quotient, temp_monome);
+        temp_monome.coefficient *= -1;
+        initialiserPolynome(&temp_polynome);
+        ajouterMonome(&temp_polynome,temp_monome);
+        produitPolynome(diviseur, temp_polynome, &produit);
+        afficherPolynome(produit);
+        sommePolynome(*reste, produit, reste);
+        afficherPolynome(*reste);
+    }
+
+    return SUCCES;
+}
+
+
+// PGCD
+/* On récupère deux polynomes a et b pour trouver leur pgcd.
+ * On fait une série de divisions euclidiennes jusqu'à que le reste soit nul*/
+int pgcdPolynome(Polynome *a, Polynome *b, Polynome pgcd) {
+    if(a->degre < 0 || b->degre < 0) {
+        fprintf(stderr, "Le degré du polynôme doit être positif ou égal à 0", ERREUR_DEGRE);
+        return ERREUR_DEGRE;
+    }
+
+    Polynome dividende;
+    Polynome reste;
+    Polynome quotient;
+
+    initialiserPolynome(&reste);
+    initialiserPolynome(&quotient);
+
+    dupliquePolynome(*a, &pgcd);
+    dupliquePolynome(*b, &dividende);
+
+    divisionEuclidiennePolynome(dividende, pgcd, &reste, &quotient);
+
+    while(reste.degre != 0) {
+        dividende = pgcd;
+        divisionEuclidiennePolynome(dividende, pgcd, &reste, &quotient);
+        pgcd = reste;
+    }
+
+    return SUCCES;
+}
+
+//Ecriture d'un polynome dans le fichier resultats.txt
+void ecriturePolynome(Polynome p)
+{
+
+    FILE* fichier = NULL;
+    fichier = fopen("resultats.txt", "a");
+
+    if (fichier != NULL)
+    {
+
+        Monome *temp = p.monomes;
+        while(temp->next != NULL)
+        {
+            fprintf(fichier,"(%f,%ld),", temp->coefficient, temp->degre);
+            temp = temp->next;
+        }
+        fprintf(fichier,"(%f,%ld));\n", temp->coefficient, temp->degre);
+
+        fclose(fichier);
+    }
+
+}
