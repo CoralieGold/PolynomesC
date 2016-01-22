@@ -438,9 +438,7 @@ int divisionEuclidiennePolynome(Polynome dividende, Polynome diviseur, Polynome 
         initialiserPolynome(&temp_polynome);
         ajouterMonome(&temp_polynome,temp_monome);
         produitPolynome(diviseur, temp_polynome, &produit);
-        afficherPolynome(produit);
         sommePolynome(*reste, produit, reste);
-        afficherPolynome(*reste);
     }
 
     return SUCCES;
